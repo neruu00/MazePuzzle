@@ -20,7 +20,7 @@ public class Maze extends JFrame {
     private JLabel statusLabel = new JLabel("현재 모드: [1] 벽 토글"+apiInfo);
 
     public Maze() {
-        setTitle("Maze Finder");
+        setTitle("Maze Puzzle");
         setLayout(new BorderLayout());
 
         JPanel gridPanel = new JPanel(new GridLayout(SIZE, SIZE));
@@ -72,11 +72,11 @@ public class Maze extends JFrame {
 
         // Control Panel
         JPanel controlPanel = new JPanel();
-        JComboBox<String> algoBox = new JComboBox<>(new String[]{"BFS", "DFS"});
+        JComboBox<String> algorithmSelector = new JComboBox<>(new String[]{"BFS", "DFS"});
         JButton runBtn = new JButton("탐색 시작");
-        runBtn.addActionListener(e -> runSolver(algoBox.getSelectedIndex() == 0 ? new BFSFinder() : new DFSFinder()));
+        runBtn.addActionListener(e -> runSolver(algorithmSelector.getSelectedIndex() == 0 ? new BFSFinder() : new DFSFinder()));
         
-        controlPanel.add(algoBox);
+        controlPanel.add(algorithmSelector);
         controlPanel.add(runBtn);
 
         add(statusLabel, BorderLayout.NORTH);
@@ -86,10 +86,11 @@ public class Maze extends JFrame {
         setSize(700, 700);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
+        setResizable(false);
     }
 
     /**
-     *  Set Mode
+     * Set Mode
      * FIXME - tile toggle issue
      * mode 1 toggle tile when tile state start point or end point
      * It's unintended function, but program works well
@@ -104,7 +105,9 @@ public class Maze extends JFrame {
     }
 
     /**
-     * why set color didn't work? ass hole
+     * why set color didn't work?
+     * this issue occurred macOS. wtf?
+     * in windows work well
      */
     private void updateUI() {
         for (int i = 0; i < SIZE; i++) {
@@ -114,11 +117,12 @@ public class Maze extends JFrame {
                     buttons[i][j].setText("START");
                 } else if (i == endNode.x && j == endNode.y) {
                     buttons[i][j].setBackground(Color.RED);
+                    buttons[i][j].setForeground(Color.WHITE);
                     buttons[i][j].setText("END");
                 } else if (grid[i][j] == 1) {
                     buttons[i][j].setBackground(Color.DARK_GRAY);
+                    buttons[i][j].setForeground(Color.WHITE);
                     buttons[i][j].setText("WALL");
-                    buttons[i][j].setForeground(Color.BLACK);
                 } else {
                     buttons[i][j].setBackground(Color.WHITE);
                     buttons[i][j].setText("");
@@ -130,11 +134,12 @@ public class Maze extends JFrame {
     private void runSolver(PathFinder finder) {
         updateUI(); // initialize last path
         SearchResult result = finder.findPath(grid, startNode, endNode);
+        
         if (result != null) {
+        	// pain result paths
             for (Point p : result.path) {
                 if (!p.equals(startNode) && !p.equals(endNode)) {
                     buttons[p.x][p.y].setBackground(Color.YELLOW);
-                    buttons[p.x][p.y].setText("●");
                 }
             }
             JOptionPane.showMessageDialog(this, "방문 노드: " + result.visitedCount + ", 최단 거리: " + result.distance);

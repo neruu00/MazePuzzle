@@ -7,18 +7,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-class DFSFinder extends BFSFinder {
+class DFSFinder extends AbstractPathFinder {
+	
+	@Override
     public SearchResult findPath(int[][] grid, Point start, Point end) {
         Stack<Point> stack = new Stack<>();
         Map<Point, Point> parentMap = new HashMap<>();
         Set<Point> visited = new LinkedHashSet<>();
 
         stack.push(start);
+        
         while (!stack.isEmpty()) {
             Point curr = stack.pop();
             if (!visited.contains(curr)) {
                 visited.add(curr);
-                if (curr.equals(end)) return super.findPath(grid, start, end);
+                if (curr.equals(end)) return buildResult(visited.size(), parentMap, end);
                 for (Point next : getNeighbors(curr, grid)) {
                     if (!visited.contains(next)) {
                         parentMap.put(next, curr);
@@ -27,6 +30,7 @@ class DFSFinder extends BFSFinder {
                 }
             }
         }
-        return null; // 경로 없음
+        
+        return null; // Impossible
     }
 }
