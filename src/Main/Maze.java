@@ -16,13 +16,18 @@ public class Maze extends JFrame {
     
 
     private int editMode = 1; 
-    private final String apiInfo = "... 1 : 벽 토글   2: 출발지 설정   3: 도착지 설정";
+    private final String apiInfo = " | [1]:벽 토글  [2]:출발지  [3]:도착지";
     private JLabel statusLabel = new JLabel("현재 모드: [1] 벽 토글"+apiInfo);
 
     public Maze() {
         setTitle("Maze Puzzle");
         setLayout(new BorderLayout());
 
+        statusLabel.setOpaque(true);
+        statusLabel.setBackground(new Color(230, 230, 230));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        statusLabel.setFont(new Font("Monospaced", Font.BOLD, 14));
+        
         JPanel gridPanel = new JPanel(new GridLayout(SIZE, SIZE));
         
         /**
@@ -73,11 +78,21 @@ public class Maze extends JFrame {
         // Control Panel
         JPanel controlPanel = new JPanel();
         JComboBox<String> algorithmSelector = new JComboBox<>(new String[]{"BFS", "DFS"});
+        
+        JButton demo1Btn = new JButton("데모: 소용돌이");
+        JButton demo2Btn = new JButton("데모: 장애물");
+
+        demo1Btn.addActionListener(e -> applyMapData(DemoMaps.getSpiralMap()));
+        demo2Btn.addActionListener(e -> applyMapData(DemoMaps.getObstacleMap()));
+        
         JButton runBtn = new JButton("탐색 시작");
         runBtn.addActionListener(e -> runSolver(algorithmSelector.getSelectedIndex() == 0 ? new BFSFinder() : new DFSFinder()));
         
         controlPanel.add(algorithmSelector);
         controlPanel.add(runBtn);
+        controlPanel.add(new JSeparator(SwingConstants.VERTICAL));
+        controlPanel.add(demo1Btn);
+        controlPanel.add(demo2Btn);
 
         add(statusLabel, BorderLayout.NORTH);
         add(gridPanel, BorderLayout.CENTER);
@@ -88,7 +103,15 @@ public class Maze extends JFrame {
         setVisible(true);
         setResizable(false);
     }
-
+    
+    private void applyMapData(DemoMaps.MapData data) {
+        this.grid = data.grid;
+        this.startNode = data.start;
+        this.endNode = data.end;
+        updateUI();
+        this.requestFocusInWindow();
+    }
+    
     /**
      * Set Mode
      * FIXME - tile toggle issue
@@ -136,7 +159,7 @@ public class Maze extends JFrame {
         SearchResult result = finder.findPath(grid, startNode, endNode);
         
         if (result != null) {
-        	// pain result paths
+        	// paint result paths
             for (Point p : result.path) {
                 if (!p.equals(startNode) && !p.equals(endNode)) {
                     buttons[p.x][p.y].setBackground(Color.YELLOW);
